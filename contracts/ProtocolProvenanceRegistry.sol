@@ -31,6 +31,36 @@ contract ProtocolProvenanceRegistry {
         string memory auditor
     ) public {
 
+        require(
+            bytes(protocolName).length > 0,
+            "Invalid protocol name"
+        );
+
+        require(
+            contractAddress != address(0),
+            "Invalid contract address"
+        );
+
+        require(
+            bytes(version).length > 0,
+            "Invalid version"
+        );
+
+        require(
+            bytes(auditHash).length > 0,
+            "Invalid audit hash"
+        );
+
+        require(
+            bytes(commitHash).length > 0,
+            "Invalid commit hash"
+        );
+
+        require(
+            bytes(auditor).length > 0,
+            "Invalid auditor"
+        );
+
         ProtocolRecord memory newRecord = ProtocolRecord({
             protocolName: protocolName,
             contractAddress: contractAddress,
@@ -49,12 +79,5 @@ contract ProtocolProvenanceRegistry {
             auditHash,
             block.timestamp
         );
-    }
-
-    function getProtocolHistory(
-        address contractAddress
-    ) public view returns (ProtocolRecord[] memory) {
-
-        return records[contractAddress];
     }
 }
