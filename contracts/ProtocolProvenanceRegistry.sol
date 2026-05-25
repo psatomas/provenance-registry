@@ -3,63 +3,129 @@ pragma solidity ^0.8.20;
 
 contract ProtocolProvenanceRegistry {
 
+    // =============================================================
+    //                           ERRORS
+    // =============================================================
+
+    error NotOwner();
+
+    error InvalidProtocolName();
+    error InvalidContractAddress();
+    error InvalidVersion();
+    error InvalidAuditHash();
+    error InvalidCommitHash();
+    error InvalidAuditor();
+
+    // =============================================================
+    //                           STRUCTS
+    // =============================================================
+
     struct ProtocolRecord {
         string protocolName;
         address contractAddress;
         string version;
-        string auditHash;
-        string commitHash;
+        bytes32 auditHash;
+        bytes32 commitHash;
         string auditor;
         uint256 timestamp;
     }
 
+    // =============================================================
+    //                           STORAGE
+    // =============================================================
+
+    address public owner;
+
     mapping(address => ProtocolRecord[]) private records;
+
+    // =============================================================
+    //                            EVENTS
+    // =============================================================
 
     event ProtocolRegistered(
         address indexed contractAddress,
+        bytes32 indexed auditHash,
+        bytes32 indexed commitHash,
+        string protocolName,
         string version,
-        string auditHash,
+        string auditor,
         uint256 timestamp
     );
+
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    // =============================================================
+    //                          MODIFIERS
+    // =============================================================
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) {
+            revert NotOwner();
+        }
+
+        _;
+    }
+
+    // =============================================================
+    //                         CONSTRUCTOR
+    // =============================================================
+
+    constructor() {
+        owner = msg.sender;
+
+        emit OwnershipTransferred(
+            address(0),
+            owner
+        );
+    }
+
+    // =============================================================
+    //                     EXTERNAL FUNCTIONS
+    // =============================================================
 
     function registerProtocolRecord(
         string memory protocolName,
         address contractAddress,
         string memory version,
-        string memory auditHash,
-        string memory commitHash,
+        bytes32 auditHash,
+        bytes32 commitHash,
         string memory auditor
-    ) public {
+    ) external onlyOwner {
 
-        require(
-            bytes(protocolName).length > 0,
-            "Invalid protocol name"
-        );
+        // =========================================================
+        //                         VALIDATION
+        // =========================================================
 
-        require(
-            contractAddress != address(0),
-            "Invalid contract address"
-        );
+        if (bytes(protocolName).length == 0) {
+            revert InvalidProtocolName();
+        }
 
-        require(
-            bytes(version).length > 0,
-            "Invalid version"
-        );
+        if (contractAddress == address(0)) {
+            revert InvalidContractAddress();
+        }
 
-        require(
-            bytes(auditHash).length > 0,
-            "Invalid audit hash"
-        );
+        if (bytes(version).length == 0) {
+            revert InvalidVersion();
+        }
 
-        require(
-            bytes(commitHash).length > 0,
-            "Invalid commit hash"
-        );
+        if (auditHash == bytes32(0)) {
+            revert InvalidAuditHash();
+        }
 
-        require(
-            bytes(auditor).length > 0,
-            "Invalid auditor"
-        );
+        if (commitHash == bytes32(0)) {
+            revert InvalidCommitHash();
+        }
+
+        if (bytes(auditor).length == 0) {
+            revert InvalidAuditor();
+        }
+
+        // =========================================================
+        //                      CREATE RECORD
+        // =========================================================
 
         ProtocolRecord memory newRecord = ProtocolRecord({
             protocolName: protocolName,
@@ -71,13 +137,79 @@ contract ProtocolProvenanceRegistry {
             timestamp: block.timestamp
         });
 
+        // =========================================================
+        //                       STORE RECORD
+        // =========================================================
+
         records[contractAddress].push(newRecord);
+
+        // =========================================================
+        //                         EMIT EVENT
+        // =========================================================
 
         emit ProtocolRegistered(
             contractAddress,
-            version,
             auditHash,
+            commitHash,
+            protocolName,
+            version,
+            auditor,
             block.timestamp
+        );
+    }
+
+    // =============================================================
+    //                        VIEW FUNCTIONS
+    // =============================================================
+
+    function getProtocolHistory(
+        address contractAddress
+    ) external view returns (ProtocolRecord[] memory) {
+
+        return records[contractAddress];
+    }
+
+    function getLatestRecord(
+        address contractAddress
+    ) external view returns (ProtocolRecord memory) {
+
+        uint256 totalRecords = records[contractAddress].length;
+
+        require(
+            totalRecords > 0,
+            "No records found"
+        );
+
+        return records[contractAddress][totalRecords - 1];
+    }
+
+    function getRecordCount(
+        address contractAddress
+    ) external view returns (uint256) {
+
+        return records[contractAddress].length;
+    }
+
+    // =============================================================
+    //                    OWNERSHIP MANAGEMENT
+    // =============================================================
+
+    function transferOwnership(
+        address newOwner
+    ) external onlyOwner {
+
+        require(
+            newOwner != address(0),
+            "Invalid owner"
+        );
+
+        address previousOwner = owner;
+
+        owner = newOwner;
+
+        emit OwnershipTransferred(
+            previousOwner,
+            newOwner
         );
     }
 }
