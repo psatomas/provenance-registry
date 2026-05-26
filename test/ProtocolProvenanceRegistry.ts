@@ -2,6 +2,20 @@ import { expect } from "chai";
 import hre from "hardhat";
 import { ethers } from "ethers";
 
+type ProtocolContract = ethers.Contract & {
+    registerProtocolRecord(
+        protocolName: string,
+        contractAddress: string,
+        version: string,
+        auditHash: string,
+        commitHash: string,
+        auditor: string
+    ): Promise<any>;
+
+    owner(): Promise<string>;
+    getProtocolHistory(address: string): Promise<any[]>;
+};
+
 describe("ProtocolProvenanceRegistry", function () {
 
     async function deployFixture() {
@@ -34,9 +48,9 @@ describe("ProtocolProvenanceRegistry", function () {
             address,
             artifact.abi,
             ownerSigner
-        );
+        ) as ProtocolContract;
 
-        const attackerContract = contract.connect(attackerSigner);
+        const attackerContract = contract.connect(attackerSigner) as ProtocolContract;
 
         return {
             contract,
@@ -111,15 +125,22 @@ describe("ProtocolProvenanceRegistry", function () {
             ethers.toUtf8Bytes("commit-sha")
         );
 
-        await expect(
-            (attackerContract as any).registerProtocolRecord(
+        let reverted = false;
+
+        try {
+            await attackerContract.registerProtocolRecord(
                 "Hack",
                 "0x9999999999999999999999999999999999999999",
                 "v999",
                 auditHash,
                 commitHash,
                 "Fake"
-            )
-        ).to.be.reverted;   
+            );
+        } catch (err: any) {
+            reverted = true;
+        }
+
+        expect(reverted).to.equal(true);
     });
+
 });
