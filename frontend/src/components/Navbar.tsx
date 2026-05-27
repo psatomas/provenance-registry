@@ -1,101 +1,26 @@
-import { ShieldCheck } from "lucide-react";
+import ConnectWalletButton from "./ConnectWalletButton";
+import { Blocks } from "lucide-react";
 
 export default function Navbar() {
-
     return (
-        <header
-            className="
-                w-full
-                border-b
-                border-white/10
-                backdrop-blur-xl
-                bg-white/5
-                sticky
-                top-0
-                z-50
-            "
-        >
-            <div
-                className="
-                    max-w-7xl
-                    mx-auto
-                    px-6
-                    py-4
-                    flex
-                    items-center
-                    justify-between
-                "
-            >
-                <div className="flex items-center gap-3">
-
-                    <div
-                        className="
-                            p-2
-                            rounded-xl
-                            bg-cyan-500/10
-                            border
-                            border-cyan-400/20
-                        "
-                    >
-                        <ShieldCheck
-                            className="text-cyan-400"
-                            size={22}
-                        />
-                    </div>
-
-                    <div>
-                        <h1
-                            className="
-                                text-xl
-                                font-bold
-                                tracking-tight
-                            "
-                        >
-                            ProofChain
-                        </h1>
-
-                        <p
-                            className="
-                                text-xs
-                                text-white/50
-                            "
-                        >
-                            On-chain provenance registry
-                        </p>
-                    </div>
+        <header className="w-full px-6 lg:px-20 py-6 flex items-center justify-between border-b border-white/10 backdrop-blur-xl bg-[#050816]/60 sticky top-0 z-50">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-300 flex items-center justify-center">
+                    <Blocks className="w-5 h-5 text-white" />
                 </div>
 
-                <nav
-                    className="
-                        hidden
-                        md:flex
-                        items-center
-                        gap-8
-                        text-sm
-                        text-white/70
-                    "
-                >
-                    <a
-                        href="#"
-                        className="hover:text-cyan-400 transition"
-                    >
-                        Register
-                    </a>
+                <div>
+                    <h1 className="text-lg font-bold">ProofChain</h1>
+                    <p className="text-xs text-slate-400">
+                        Protocol Provenance Layer
+                    </p>
+                </div>
+            </div>
 
-                    <a
-                        href="#"
-                        className="hover:text-cyan-400 transition"
-                    >
-                        Verify
-                    </a>
-
-                    <a
-                        href="#"
-                        className="hover:text-cyan-400 transition"
-                    >
-                        Explorer
-                    </a>
-                </nav>
+            {/* Right side */}
+            <div className="flex items-center gap-4">
+                <ConnectWalletButton />
             </div>
         </header>
     );
