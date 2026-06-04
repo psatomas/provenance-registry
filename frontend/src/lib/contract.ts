@@ -58,3 +58,45 @@ export async function getSignerContract() {
         signer
     );
 }
+
+// =========================================================
+// PROTOCOL HISTORY
+// =========================================================
+
+export async function getProtocolHistory(
+    contractAddress: string
+) {
+    const contract = await getContract();
+
+    return await contract.getProtocolHistory(
+        contractAddress
+    );
+}
+
+// =========================================================
+// LATEST RECORD
+// =========================================================
+
+export async function getLatestRecord(
+    contractAddress: string
+) {
+    const contract = await getContract();
+
+    return await contract.getLatestRecord(
+        contractAddress
+    );
+}
+
+// =========================================================
+// RECORD COUNT
+// =========================================================
+
+export async function getRecordCount(
+    contractAddress: string
+) {
+    const contract = await getContract();
+
+    return await contract.getRecordCount(
+        contractAddress
+    );
+}
