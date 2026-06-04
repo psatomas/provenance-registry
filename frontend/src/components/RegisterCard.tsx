@@ -1,13 +1,78 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 import {
     FileCode2,
     Shield,
     Hash,
-    Fingerprint
+    Fingerprint,
+    Loader2,
+    CheckCircle2,
+    AlertCircle
 } from "lucide-react";
 
+import { getSignerContract } from "../lib/contract";
+
 export default function RegisterCard() {
+
+    const [protocolName, setProtocolName] = useState("");
+    const [version, setVersion] = useState("");
+    const [contractAddress, setContractAddress] = useState("");
+    const [auditHash, setAuditHash] = useState("");
+    const [commitHash, setCommitHash] = useState("");
+    const [auditor, setAuditor] = useState("");
+
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    async function handleSubmit() {
+
+        try {
+
+            setLoading(true);
+            setError("");
+            setSuccess(false);
+
+            const contract = await getSignerContract();
+
+            // IMPORTANT:
+            // Adjust arguments if your Solidity function differs.
+            const tx = await contract.registerProtocolRecord(
+                protocolName,
+                contractAddress,
+                version,
+                auditHash,
+                commitHash,
+                auditor
+            );
+
+            await tx.wait();
+
+            setSuccess(true);
+
+            setProtocolName("");
+            setVersion("");
+            setContractAddress("");
+            setAuditHash("");
+            setCommitHash("");
+            setAuditor("");
+
+        } catch (err: any) {
+
+            console.error(err);
+
+            setError(
+                err?.reason ||
+                err?.message ||
+                "Transaction failed"
+            );
+
+        } finally {
+
+            setLoading(false);
+        }
+    }
 
     return (
 
@@ -143,6 +208,8 @@ export default function RegisterCard() {
                             icon={<FileCode2 size={18} />}
                             label="Protocol Name"
                             placeholder="ProofChain"
+                            value={protocolName}
+                            onChange={setProtocolName}
                         />
 
                         {/* VERSION */}
@@ -151,6 +218,8 @@ export default function RegisterCard() {
                             icon={<Shield size={18} />}
                             label="Version"
                             placeholder="v1.0.0"
+                            value={version}
+                            onChange={setVersion}
                         />
 
                         {/* CONTRACT */}
@@ -160,6 +229,8 @@ export default function RegisterCard() {
                                 icon={<Fingerprint size={18} />}
                                 label="Contract Address"
                                 placeholder="0x..."
+                                value={contractAddress}
+                                onChange={setContractAddress}
                             />
                         </div>
 
@@ -170,6 +241,8 @@ export default function RegisterCard() {
                                 icon={<Hash size={18} />}
                                 label="Audit Hash"
                                 placeholder="0x audit hash"
+                                value={auditHash}
+                                onChange={setAuditHash}
                             />
                         </div>
 
@@ -180,6 +253,8 @@ export default function RegisterCard() {
                                 icon={<Hash size={18} />}
                                 label="Commit Hash"
                                 placeholder="0x commit hash"
+                                value={commitHash}
+                                onChange={setCommitHash}
                             />
                         </div>
 
@@ -190,6 +265,8 @@ export default function RegisterCard() {
                                 icon={<Shield size={18} />}
                                 label="Auditor"
                                 placeholder="OpenZeppelin"
+                                value={auditor}
+                                onChange={setAuditor}
                             />
                         </div>
                     </div>
@@ -210,7 +287,7 @@ export default function RegisterCard() {
                         "
                     >
 
-                        <div>
+                        <div className="space-y-2">
 
                             <p
                                 className="
@@ -222,9 +299,43 @@ export default function RegisterCard() {
                                 on-chain and permanently
                                 auditable.
                             </p>
+
+                            {success && (
+                                <div
+                                    className="
+                                        flex
+                                        items-center
+                                        gap-2
+                                        text-green-400
+                                        text-sm
+                                    "
+                                >
+                                    <CheckCircle2 size={16} />
+                                    Protocol successfully registered.
+                                </div>
+                            )}
+
+                            {error && (
+                                <div
+                                    className="
+                                        flex
+                                        items-center
+                                        gap-2
+                                        text-red-400
+                                        text-sm
+                                        max-w-xl
+                                        break-words
+                                    "
+                                >
+                                    <AlertCircle size={16} />
+                                    {error}
+                                </div>
+                            )}
                         </div>
 
                         <button
+                            onClick={handleSubmit}
+                            disabled={loading}
                             className="
                                 px-8
                                 py-4
@@ -235,9 +346,26 @@ export default function RegisterCard() {
                                 hover:scale-105
                                 transition
                                 shadow-[0_0_40px_rgba(34,211,238,0.35)]
+                                disabled:opacity-60
+                                disabled:hover:scale-100
+                                flex
+                                items-center
+                                gap-2
                             "
                         >
-                            Submit On-Chain
+
+                            {loading ? (
+                                <>
+                                    <Loader2
+                                        size={18}
+                                        className="animate-spin"
+                                    />
+                                    Confirming Transaction...
+                                </>
+                            ) : (
+                                "Submit On-Chain"
+                            )}
+
                         </button>
                     </div>
                 </motion.div>
@@ -250,12 +378,16 @@ type InputProps = {
     icon: React.ReactNode;
     label: string;
     placeholder: string;
+    value: string;
+    onChange: (value: string) => void;
 };
 
 function InputField({
     icon,
     label,
-    placeholder
+    placeholder,
+    value,
+    onChange
 }: InputProps) {
 
     return (
@@ -277,6 +409,8 @@ function InputField({
             </label>
 
             <input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 className="
                     w-full

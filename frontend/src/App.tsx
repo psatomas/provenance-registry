@@ -1,5 +1,23 @@
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+} from "react-router-dom";
+
 import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Verify from "./pages/Verify";
+import Explorer from "./pages/Explorer";
 
 export default function App() {
-    return <Home />;
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/verify" element={<Verify />} />
+                <Route path="/explorer" element={<Explorer />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
