@@ -3,33 +3,33 @@ import {
     ShieldAlert,
     DatabaseZap,
     FileWarning,
-    LockKeyhole,
+    Clock3,
 } from "lucide-react";
 
 const problems = [
     {
         icon: ShieldAlert,
-        title: "No Provenance Layer",
+        title: "Audit Authenticity Is Hard To Verify",
         description:
-            "Protocols evolve constantly, but there is no immutable on-chain history proving who created, upgraded, or modified critical infrastructure.",
+            "Many protocols publish audit reports, but users have no simple way to verify whether a document is genuine, current, or has been modified after publication.",
     },
     {
         icon: FileWarning,
-        title: "Trust Is Fragmented",
+        title: "Critical Data Is Scattered",
         description:
-            "Auditors, investors, and developers rely on scattered documentation, GitHub commits, and unverifiable claims instead of cryptographic proof.",
+            "Audit reports, GitHub commits, deployment addresses, and version histories are spread across multiple platforms, making verification slow and unreliable.",
     },
     {
         icon: DatabaseZap,
-        title: "Centralized Registries",
+        title: "Centralized Sources Of Truth",
         description:
-            "Existing registries depend on centralized platforms that can be manipulated, censored, or lose historical integrity over time.",
+            "Protocol records often depend on centralized websites and repositories that can change, disappear, or lose historical context over time.",
     },
     {
-        icon: LockKeyhole,
-        title: "Weak Upgrade Transparency",
+        icon: Clock3,
+        title: "Protocol History Is Difficult To Track",
         description:
-            "Most users cannot easily verify protocol ownership changes, upgrade chronology, or operational authenticity.",
+            "Users and auditors often struggle to verify when protocol upgrades occurred, who approved them, and which audit report corresponds to each version.",
     },
 ];
 
@@ -54,18 +54,19 @@ export default function ProblemSection() {
                     </div>
 
                     <h2 className="text-4xl lg:text-6xl font-bold leading-tight">
-                        Web3 lacks a trusted
+                        Protocol trust still depends on
                         <span className="bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
                             {" "}
-                            provenance layer
+                            manual verification
                         </span>
                     </h2>
 
                     <p className="text-slate-400 text-lg leading-relaxed mt-6">
-                        Protocol infrastructure evolves rapidly, but the
-                        ecosystem still lacks an immutable and verifiable system
-                        for tracking protocol ownership, upgrade lineage, and
-                        historical authenticity.
+                        Protocol audits, version histories, deployment records,
+                        and development activity are often distributed across
+                        multiple platforms. This makes it difficult to verify
+                        authenticity, trace protocol evolution, and establish a
+                        trusted source of historical truth.
                     </p>
                 </motion.div>
 
