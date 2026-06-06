@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+import { getSignerContract } from "../lib/contract";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
@@ -10,8 +12,6 @@ import {
     CheckCircle2,
     AlertCircle
 } from "lucide-react";
-
-import { getSignerContract } from "../lib/contract";
 
 export default function RegisterCard() {
 
@@ -28,51 +28,131 @@ export default function RegisterCard() {
 
     async function handleSubmit() {
 
-        try {
+    try {
 
-            setLoading(true);
-            setError("");
-            setSuccess(false);
+        setLoading(true);
+        setError("");
+        setSuccess(false);
 
-            const contract = await getSignerContract();
+        // =====================================================
+        // VALIDATION
+        // =====================================================
 
-            // IMPORTANT:
-            // Adjust arguments if your Solidity function differs.
-            const tx = await contract.registerProtocolRecord(
-                protocolName,
-                contractAddress,
-                version,
-                auditHash,
-                commitHash,
-                auditor
+        if (!protocolName.trim()) {
+            throw new Error(
+                "Protocol name is required"
             );
-
-            await tx.wait();
-
-            setSuccess(true);
-
-            setProtocolName("");
-            setVersion("");
-            setContractAddress("");
-            setAuditHash("");
-            setCommitHash("");
-            setAuditor("");
-
-        } catch (err: any) {
-
-            console.error(err);
-
-            setError(
-                err?.reason ||
-                err?.message ||
-                "Transaction failed"
-            );
-
-        } finally {
-
-            setLoading(false);
         }
+
+        if (!ethers.isAddress(contractAddress)) {
+            throw new Error(
+                "Invalid contract address"
+            );
+        }
+
+        if (!version.trim()) {
+            throw new Error(
+                "Version is required"
+            );
+        }
+
+        if (!auditHash.trim()) {
+            throw new Error(
+                "Audit hash is required"
+            );
+        }
+
+        if (!commitHash.trim()) {
+            throw new Error(
+                "Commit hash is required"
+            );
+        }
+
+        if (!auditor.trim()) {
+            throw new Error(
+                "Auditor is required"
+            );
+        }
+
+        // =====================================================
+        // CONVERT TO BYTES32
+        // =====================================================
+
+        const auditHashBytes32 =
+            ethers.keccak256(
+                ethers.toUtf8Bytes(
+                    auditHash.trim()
+                )
+            );
+
+        const commitHashBytes32 =
+            ethers.keccak256(
+                ethers.toUtf8Bytes(
+                    commitHash.trim()
+                )
+            );
+
+        // =====================================================
+        // DEBUG
+        // =====================================================
+
+        console.log({
+            protocolName,
+            contractAddress,
+            version,
+            auditHashBytes32,
+            commitHashBytes32,
+            auditor
+        });
+
+        // =====================================================
+        // CONTRACT
+        // =====================================================
+
+        const contract =
+            await getSignerContract();
+
+        const tx =
+            await contract.registerProtocolRecord(
+                protocolName.trim(),
+                contractAddress,
+                version.trim(),
+                auditHashBytes32,
+                commitHashBytes32,
+                auditor.trim()
+            );
+
+        await tx.wait();
+
+        // =====================================================
+        // SUCCESS
+        // =====================================================
+
+        setSuccess(true);
+
+        setProtocolName("");
+        setVersion("");
+        setContractAddress("");
+        setAuditHash("");
+        setCommitHash("");
+        setAuditor("");
+
+    } catch (err: any) {
+
+        console.error(err);
+
+        setError(
+            err?.reason ||
+            err?.shortMessage ||
+            err?.message ||
+            "Transaction failed"
+        );
+
+    } finally {
+
+        setLoading(false);
     }
+}
 
     return (
 
@@ -90,55 +170,6 @@ export default function RegisterCard() {
                     mx-auto
                 "
             >
-
-                {/* HEADER */}
-
-                <div className="mb-14">
-
-                    <div
-                        className="
-                            inline-flex
-                            items-center
-                            gap-2
-                            px-4
-                            py-2
-                            rounded-full
-                            border
-                            border-cyan-400/20
-                            bg-cyan-400/10
-                            text-cyan-300
-                            text-sm
-                            mb-6
-                        "
-                    >
-                        On-chain registration flow
-                    </div>
-
-                    <h2
-                        className="
-                            text-4xl
-                            md:text-5xl
-                            font-black
-                            tracking-tight
-                        "
-                    >
-                        Register Protocol
-                    </h2>
-
-                    <p
-                        className="
-                            mt-4
-                            text-white/60
-                            max-w-2xl
-                            leading-relaxed
-                        "
-                    >
-                        Create immutable provenance
-                        records with audit hashes,
-                        version history and verifiable
-                        blockchain timestamps.
-                    </p>
-                </div>
 
                 {/* CARD */}
 

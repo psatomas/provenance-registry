@@ -4,19 +4,28 @@ import VerifyCard from "../components/VerifyCard";
 import AuditSummaryCard from "../components/AuditSummaryCard";
 
 import { getLatestRecord } from "../lib/contract";
+import { hashPdf } from "../lib/hashPdf";
 
 export default function Verify() {
-    const [aiData, setAiData] = useState(null);
+    const [aiData, setAiData] = useState<any>(null);
     const [loadingAI, setLoadingAI] = useState(false);
     const [errorAI, setErrorAI] = useState("");
 
-    // 🔥 AI integration function
+    // 🔥 AI integration function (serverless OpenAI)
     async function handleAI(record: any) {
         try {
             setLoadingAI(true);
             setErrorAI("");
 
-            const auditText = JSON.stringify(record, null, 2);
+            const auditText = `
+Protocol: ${record.protocolName}
+Contract: ${record.contractAddress}
+Version: ${record.version}
+Auditor: ${record.auditor}
+Audit Hash: ${record.auditHash}
+Commit Hash: ${record.commitHash}
+Timestamp: ${record.timestamp}
+`;
 
             const res = await fetch("/api/audit-summary", {
                 method: "POST",
@@ -27,8 +36,10 @@ export default function Verify() {
             });
 
             const data = await res.json();
+
             setAiData(data);
         } catch (e) {
+            console.error(e);
             setErrorAI("Failed to generate AI summary");
         } finally {
             setLoadingAI(false);
@@ -40,6 +51,7 @@ export default function Verify() {
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-6 py-20">
+                {/* HEADER */}
                 <div className="mb-12">
                     <h1 className="text-5xl font-black">
                         Verify Audit
@@ -50,25 +62,24 @@ export default function Verify() {
                     </p>
                 </div>
 
-                {/* 🔥 We override VerifyCard to inject AI trigger */}
-                <VerifyCardWithAI
-                    onAIRequest={handleAI}
-                />
+                {/* VERIFY FLOW */}
+                <VerifyCardWithAI onAIRequest={handleAI} />
 
-                {/* AI RESULT */}
-                <AuditSummaryCard
-                    data={aiData}
-                    loading={loadingAI}
-                    error={errorAI}
-                />
+                {/* AI OUTPUT */}
+                <div className="mt-10">
+                    <AuditSummaryCard
+                        data={aiData}
+                        loading={loadingAI}
+                        error={errorAI}
+                    />
+                </div>
             </div>
         </main>
     );
 }
 
 /**
- * Wrapper layer to connect AI trigger with existing VerifyCard
- * (keeps your original logic untouched)
+ * Wrapper that keeps VerifyCard UI clean and injects AI trigger logic
  */
 function VerifyCardWithAI({
     onAIRequest,
@@ -80,7 +91,6 @@ function VerifyCardWithAI({
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
     const [result, setResult] = useState<any>(null);
 
     async function handleVerify() {
@@ -100,11 +110,7 @@ function VerifyCardWithAI({
 
             setLoading(true);
 
-            const { hashPdf } = await import("../lib/hashPdf");
-
             const uploadedHash = await hashPdf(file);
-
-            const { getLatestRecord } = await import("../lib/contract");
             const record = await getLatestRecord(contractAddress);
 
             const valid =
@@ -121,9 +127,12 @@ function VerifyCardWithAI({
 
             setResult(finalResult);
 
-            // 🔥 TRIGGER AI AFTER SUCCESSFUL VERIFY
-            onAIRequest(record);
+            // 🔥 AI ONLY triggers when verification is valid
+            if (valid) {
+                onAIRequest(record);
+            }
         } catch (err) {
+            console.error(err);
             setError("Unable to verify protocol. Record may not exist.");
         } finally {
             setLoading(false);

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import artifact from "../../../artifacts/contracts/ProtocolProvenanceRegistry.sol/ProtocolProvenanceRegistry.json";
+import artifact from "../artifacts/ProtocolProvenanceRegistry.json"
 
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 

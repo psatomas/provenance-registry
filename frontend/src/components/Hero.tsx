@@ -76,7 +76,7 @@ export default function Hero() {
                         tracking-tight
                     "
         >
-          Protocol Provenance
+          Provenance Registry
           <span
             className="
                             block

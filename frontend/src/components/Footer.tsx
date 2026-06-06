@@ -12,7 +12,7 @@ export default function Footer() {
 
                         <div>
                             <h3 className="text-xl font-bold">
-                                ProofChain
+                                Provenance Registry
                             </h3>
 
                             <p className="text-sm text-slate-400">

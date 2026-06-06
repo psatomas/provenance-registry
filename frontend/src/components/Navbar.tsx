@@ -70,7 +70,7 @@ export default function Navbar() {
 
                     <div>
                         <h1 className="text-lg font-bold">
-                            ProofChain
+                            Provenance Registry
                         </h1>
 
                         <p

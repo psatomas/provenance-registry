@@ -1,6 +1,12 @@
 import { motion } from "framer-motion";
 
-const timeline = [
+type TimelineItem = {
+    title: string;
+    date: string;
+    description: string;
+};
+
+const timeline: TimelineItem[] = [
     {
         title: "Protocol Registered",
         date: "Genesis Event",
@@ -28,6 +34,10 @@ const timeline = [
 ];
 
 export default function ProtocolTimeline() {
+    if (!Array.isArray(timeline)) {
+        return null;
+    }
+
     return (
         <section className="px-6 lg:px-20 py-28">
             <div className="max-w-6xl mx-auto">
@@ -37,9 +47,8 @@ export default function ProtocolTimeline() {
                     </div>
 
                     <h2 className="text-4xl lg:text-6xl font-bold leading-tight">
-                        Immutable protocol
+                        Immutable protocol{" "}
                         <span className="bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
-                            {" "}
                             evolution timeline
                         </span>
                     </h2>
