@@ -1,23 +1,11 @@
 {
-  "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.6",
-    "@tailwindcss/vite": "^4.3.0",
-    "@types/chai": "^5.2.3",
-    "@types/chai-as-promised": "^8.0.2",
-    "@types/dotenv": "^6.1.1",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "^22.19.19",
-    "chai": "^6.2.2",
-    "dotenv": "^17.4.2",
-    "ethers": "^6.16.0",
-    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
-    "hardhat": "^3.5.1",
-    "mocha": "^11.7.6",
-    "tailwindcss": "^4.3.0",
-    "typescript": "~6.0.3"
-  },
+  "name": "proofchain-debug",
+  "version": "1.0.0",
   "type": "module",
-  "dependencies": {
-    "openai": "^6.42.0"
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition-ethers": "^3.1.6",
+    "@types/node": "22.10.0",
+    "hardhat": "3.8.0",
+    "typescript": "6.0.3"
   }
 }
