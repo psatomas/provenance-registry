@@ -1,65 +1,11 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import VerifyCard from "../components/VerifyCard";
-import AuditSummaryCard from "../components/AuditSummaryCard";
 
 import { getLatestRecord } from "../lib/contract";
 import { hashPdf } from "../lib/hashPdf";
 
 export default function Verify() {
-  const [aiData, setAiData] = useState<any>(null);
-  const [loadingAI, setLoadingAI] = useState(false);
-  const [errorAI, setErrorAI] = useState("");
-
-  // 🔥 AI integration function (serverless OpenAI)
-  async function handleAI(record: any) {
-    try {
-      setLoadingAI(true);
-      setErrorAI("");
-      setAiData(null);
-
-      const auditText = `
-Protocol: ${record.protocolName}
-Contract: ${record.contractAddress}
-Version: ${record.version}
-Auditor: ${record.auditor}
-Audit Hash: ${record.auditHash}
-Commit Hash: ${record.commitHash}
-Timestamp: ${record.timestamp}
-`;
-
-      const res = await fetch("/api/audit-summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ auditText }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-
-        throw new Error(
-          `API Error ${res.status}: ${text || "No response body"}`,
-        );
-      }
-
-      const data = await res.json();
-
-      console.log("AI response:", data);
-
-      setAiData(data);
-    } catch (e) {
-      console.error("AI Summary Error:", e);
-
-      setErrorAI(
-        e instanceof Error ? e.message : "Failed to generate AI summary",
-      );
-    } finally {
-      setLoadingAI(false);
-    }
-  }
-
   return (
     <main className="min-h-screen bg-[#050816] text-white">
       <Navbar />
@@ -75,25 +21,13 @@ Timestamp: ${record.timestamp}
         </div>
 
         {/* VERIFY FLOW */}
-        <VerifyCardWithAI onAIRequest={handleAI} />
-
-        {/* AI OUTPUT */}
-        <div className="mt-10">
-          <AuditSummaryCard data={aiData} loading={loadingAI} error={errorAI} />
-        </div>
+        <VerifyCardWithVerification />
       </div>
     </main>
   );
 }
 
-/**
- * Wrapper that keeps VerifyCard UI clean and injects AI trigger logic
- */
-function VerifyCardWithAI({
-  onAIRequest,
-}: {
-  onAIRequest: (record: any) => void;
-}) {
+function VerifyCardWithVerification() {
   const [contractAddress, setContractAddress] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
@@ -127,15 +61,12 @@ function VerifyCardWithAI({
       const finalResult = {
         valid,
         ...record,
-        timestamp: new Date(Number(record.timestamp) * 1000).toLocaleString(),
+        timestamp: new Date(
+          Number(record.timestamp) * 1000
+        ).toLocaleString(),
       };
 
       setResult(finalResult);
-
-      // 🔥 AI ONLY triggers when verification is valid
-      if (valid) {
-        onAIRequest(record);
-      }
     } catch (err) {
       console.error(err);
       setError("Unable to verify protocol. Record may not exist.");
