@@ -312,13 +312,3 @@ Adicionar integrantes
 MIT
 ```
 
----
-
-Se quiser elevar ainda mais (nível “projeto vencedor de hackathon”), o próximo upgrade seria:
-
-- adicionar **badges clicáveis no topo (Sepolia, Solidity, React, Hardhat)**
-- adicionar **links reais do contrato na Sepolia**
-- adicionar **GIF demo inline**
-- adicionar **diagrama SVG da arquitetura**
-
-Só me fala.
