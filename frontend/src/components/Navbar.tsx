@@ -40,10 +40,8 @@ export default function Navbar() {
             "
         >
             {/* LEFT SIDE */}
-
             <div className="flex items-center gap-12">
                 {/* LOGO */}
-
                 <Link
                     to="/"
                     className="
@@ -52,21 +50,12 @@ export default function Navbar() {
                         gap-3
                     "
                 >
-                    <div
-                        className="
-                            w-10
-                            h-10
-                            rounded-xl
-                            bg-gradient-to-br
-                            from-blue-500
-                            to-blue-300
-                            flex
-                            items-center
-                            justify-center
-                        "
-                    >
-                        <Blocks className="w-5 h-5 text-white" />
-                    </div>
+                    {/* LOGO IMAGE */}
+                    <img 
+                        src="/favicon.svg" 
+                        alt="Provenance Registry Logo" 
+                        className="w-10 h-10" 
+                    />
 
                     <div>
                         <h1 className="text-lg font-bold">
