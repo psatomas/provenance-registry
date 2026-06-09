@@ -150,6 +150,14 @@ export default function Hero() {
           >
             Explore Registry
           </Link>
+          <a
+            href="/pitch/slides.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-8 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
+          >
+            Pitch Deck
+          </a>
         </div>
       </motion.div>
     </section>
