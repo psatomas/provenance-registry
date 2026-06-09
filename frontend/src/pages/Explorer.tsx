@@ -193,15 +193,6 @@ function Badge() {
   );
 }
 
-function Info({ label, value }: any) {
-  return (
-    <div>
-      <p className="text-slate-400">{label}</p>
-      <p className="font-medium break-all">{value}</p>
-    </div>
-  );
-}
-
 function format(ts: any) {
   return new Date(Number(ts) * 1000).toLocaleString();
 }
