@@ -242,6 +242,14 @@ Verify System: Complete
 
 ---
 
+## 📦 Deliverables
+
+- 🌐 Live App: https://protocol-provenance-registry.vercel.app
+- 📄 Pitch Deck (Vercel): https://protocol-provenance-registry.vercel.app/pitch/slides.pdf
+- 📄 Pitch Deck (GitHub Raw): https://raw.githubusercontent.com/psatomas/provenance-registry/main/frontend/public/pitch/slides.pdf
+
+---
+
 ## 🚀 Impact
 
 - Removes trust dependency in audits
@@ -445,6 +453,14 @@ Completo em todas as camadas
 4. Abrir Explorer
 5. Enviar PDF
 6. Verificar integridade
+
+---
+
+## 📦 Entregáveis
+
+- 🌐 Aplicação ao vivo: https://protocol-provenance-registry.vercel.app
+- 📄 Pitch Deck (Vercel): https://protocol-provenance-registry.vercel.app/pitch/slides.pdf
+- 📄 Pitch Deck (GitHub Raw): https://raw.githubusercontent.com/psatomas/provenance-registry/main/frontend/public/pitch/slides.pdf
 
 ---
 
