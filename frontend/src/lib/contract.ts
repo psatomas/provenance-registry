@@ -1,8 +1,10 @@
 import { ethers } from "ethers";
-
-import artifact from "../artifacts/ProtocolProvenanceRegistry.json"
+import artifact from "../abi/ProtocolProvenanceRegistry.json";
 
 const CONTRACT_ADDRESS = "0x8166431404B7f8e5e9d351333e08548a23Bbdae0";
+
+// Extract ABI safely
+const abi = artifact.abi;
 
 declare global {
     interface Window {
@@ -40,7 +42,7 @@ export async function getContract() {
 
     return new ethers.Contract(
         CONTRACT_ADDRESS,
-        artifact.abi,
+        abi,
         provider
     );
 }
@@ -54,7 +56,7 @@ export async function getSignerContract() {
 
     return new ethers.Contract(
         CONTRACT_ADDRESS,
-        artifact.abi,
+        abi,
         signer
     );
 }
@@ -63,40 +65,28 @@ export async function getSignerContract() {
 // PROTOCOL HISTORY
 // =========================================================
 
-export async function getProtocolHistory(
-    contractAddress: string
-) {
+export async function getProtocolHistory(contractAddress: string) {
     const contract = await getContract();
 
-    return await contract.getProtocolHistory(
-        contractAddress
-    );
+    return await contract.getProtocolHistory(contractAddress);
 }
 
 // =========================================================
 // LATEST RECORD
 // =========================================================
 
-export async function getLatestRecord(
-    contractAddress: string
-) {
+export async function getLatestRecord(contractAddress: string) {
     const contract = await getContract();
 
-    return await contract.getLatestRecord(
-        contractAddress
-    );
+    return await contract.getLatestRecord(contractAddress);
 }
 
 // =========================================================
 // RECORD COUNT
 // =========================================================
 
-export async function getRecordCount(
-    contractAddress: string
-) {
+export async function getRecordCount(contractAddress: string) {
     const contract = await getContract();
 
-    return await contract.getRecordCount(
-        contractAddress
-    );
+    return await contract.getRecordCount(contractAddress);
 }
