@@ -248,9 +248,10 @@ Verify System: Complete
 
 ## 📦 Deliverables
 
-- 🌐 Live App: https://protocol-provenance-registry.vercel.app
-- 📄 Pitch Deck (Vercel): https://protocol-provenance-registry.vercel.app/pitch/slides.pdf
-- 📄 Pitch Deck (GitHub Raw): https://raw.githubusercontent.com/psatomas/provenance-registry/main/frontend/public/pitch/slides.pdf
+- 🌐 Live App: https://protocol-provenance-registry.vercel.app  
+- 📄 Pitch Deck (Vercel): https://protocol-provenance-registry.vercel.app/pitch/slides.pdf  
+- 📄 Pitch Deck (GitHub Raw): https://raw.githubusercontent.com/psatomas/provenance-registry/main/frontend/public/pitch/slides.pdf  
+- 🎥 Video Pitch (YouTube): https://www.youtube.com/watch?v=YnaDlZ6Ywwg
 
 ---
 
@@ -467,6 +468,7 @@ Completo em todas as camadas
 - 🌐 Aplicação ao vivo: https://protocol-provenance-registry.vercel.app
 - 📄 Pitch Deck (Vercel): https://protocol-provenance-registry.vercel.app/pitch/slides.pdf
 - 📄 Pitch Deck (GitHub Raw): https://raw.githubusercontent.com/psatomas/provenance-registry/main/frontend/public/pitch/slides.pdf
+- 🎥 Video Pitch (YouTube): https://www.youtube.com/watch?v=YnaDlZ6Ywwg 
 
 ---
 
