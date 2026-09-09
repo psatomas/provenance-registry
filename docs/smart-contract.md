@@ -10,7 +10,10 @@ The contract is responsible for maintaining an **immutable, versioned registry o
 
 ## 📌 Contract Overview
 
-The contract acts as a **decentralized registry of protocol evolution**, enabling:
+The contract acts as an **owner-curated on-chain registry of protocol evolution**
+— deployed on decentralized infrastructure (Ethereum), with publicly verifiable,
+tamper-proof storage, but with registration itself restricted to a single
+authorized owner (see "Authorization Model" below). It enables:
 
 - Protocol registration
 - Version tracking

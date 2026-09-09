@@ -2,16 +2,25 @@
 
 This document defines the security assumptions, threat model, and integrity guarantees of the ProofChain system.
 
-ProofChain is a **trustless, blockchain-based protocol provenance system** where security is enforced through smart contract logic and cryptographic verification.
+ProofChain is an **owner-curated, blockchain-based protocol provenance system**.
+Once a record is written, its integrity and history are enforced trustlessly
+through smart contract logic and cryptographic verification — nobody, including
+the registry owner, can alter or fake it afterward, and anyone can independently
+verify it. Writing a *new* record, however, is not trustless: it is restricted to
+a single authorized owner account (see "Authorization model" below), not
+self-attested by protocols or open to arbitrary callers.
 
 ---
 
 ## 🧭 Security Philosophy
 
-ProofChain follows a **minimal trust architecture**:
+ProofChain follows a **minimal trust architecture for everything except
+registration**:
 
 - No centralized backend exists
-- Blockchain is the source of truth
+- Blockchain is the source of truth for whatever has been registered
+- Registration (writes) is restricted to the registry owner — this is the one
+  deliberately centralized trust assumption in the system
 - Clients are untrusted execution environments
 - Verification is deterministic and cryptographic
 

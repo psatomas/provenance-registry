@@ -158,14 +158,16 @@ F-->>U: Render timeline UI
 
 ## 🔐 Trust Model
 
-ProofChain is designed as a **trust-minimized system**:
+ProofChain minimizes trust everywhere except one deliberate point: who is
+allowed to register a new record.
 
 | Layer | Trust Requirement |
 |------|------------------|
 | Frontend | Untrusted |
 | Wallet | User-controlled |
-| Smart Contract | Trustless logic |
-| Blockchain | Canonical truth |
+| Smart Contract logic | Deterministic, publicly verifiable, cannot be altered after deployment |
+| Registration authority | **Owner-curated** — only the contract owner can call `registerProtocolRecord` (not trustless) |
+| Blockchain | Canonical truth for whatever has been registered |
 
 ---
 
@@ -188,7 +190,9 @@ Each record includes:
 ## 🧠 Design Principles
 
 - ⛓️ Blockchain as source of truth
-- 🔒 Minimal trust assumptions
+- 🔒 Minimal trust assumptions outside of registration (reads, integrity
+  verification, and immutability are trustless; writing a record is
+  owner-curated, not permissionless)
 - 🧾 Cryptographic verification (hash-based)
 - 📦 Append-only data structure
 - 🔍 Full transparency via public chain
@@ -207,11 +211,13 @@ Each record includes:
 
 ## 🏁 Summary
 
-ProofChain is structured as a **fully decentralized provenance system**, where:
+ProofChain is structured as an **owner-curated provenance system with
+decentralized verification**, where:
 
 - UI is only an interface
 - Wallet handles identity
-- Smart contract enforces rules
-- Blockchain guarantees truth
+- Smart contract enforces rules, including owner-gated registration
+- Blockchain guarantees truth for whatever has been registered, and lets
+  anyone verify it independently
 
 ---

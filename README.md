@@ -217,10 +217,23 @@ User → Smart Contract → History → Timeline UI
 
 ## 🧠 Trust Model
 
-- Blockchain = Source of Truth
+Provenance Registry separates two distinct guarantees:
+
+- **Trustless once written**: blockchain immutability, public verifiability, and
+  keccak256-based integrity checking mean nobody — including the registry owner —
+  can alter or fake a record after it's on-chain, and anyone can independently
+  verify it.
+- **Owner-curated writes**: creating a new record is restricted to the registry
+  owner (`onlyOwner`). This is an **owner-curated provenance registry**, not a
+  self-attestation or fully permissionless system — the owner decides what gets
+  registered.
+
+Roles:
+
+- Blockchain = Source of Truth (for whatever has been registered)
 - Hashing = Integrity Layer
 - Wallet = Identity Layer
-- Smart Contract = Execution Layer
+- Owner-gated Smart Contract = Registration Authority + Execution Layer
 
 ---
 
@@ -257,7 +270,9 @@ Verify System: Complete
 
 ## 🚀 Impact
 
-- Removes trust dependency in audits
+- Reduces trust dependency in audit record-keeping: once a record is registered,
+  its integrity and history are trustless and publicly verifiable (registration
+  itself remains owner-curated)
 - Enables verifiable protocol evolution
 - Provides public audit transparency layer
 - Establishes blockchain-native audit history
@@ -439,10 +454,24 @@ Usuário → Smart Contract → Histórico → Timeline
 
 ## 🧠 Modelo de Confiança
 
-- Blockchain = Verdade
+O Provenance Registry separa duas garantias distintas:
+
+- **Sem confiança necessária após o registro**: a imutabilidade da blockchain, a
+  verificabilidade pública e a verificação de integridade via keccak256 garantem
+  que ninguém — nem mesmo o owner do registro — pode alterar ou falsificar um
+  registro depois de gravado on-chain, e qualquer pessoa pode verificá-lo de
+  forma independente.
+- **Escrita curada pelo owner**: criar um novo registro é restrito ao owner do
+  contrato (`onlyOwner`). Este é um **registro de proveniência curado pelo
+  owner**, não um sistema de auto-atestação ou totalmente sem permissão — o
+  owner decide o que é registrado.
+
+Papéis:
+
+- Blockchain = Verdade (para o que já foi registrado)
 - Hash = Integridade
 - Carteira = Identidade
-- Smart Contract = Execução
+- Smart Contract com controle de owner = Autoridade de Registro + Execução
 
 ---
 
@@ -474,7 +503,9 @@ Completo em todas as camadas
 
 ## 🚀 Impacto
 
-- Remove dependência de confiança centralizada
+- Reduz a dependência de confiança no registro de auditorias: uma vez
+  registrado, o histórico e a integridade são verificáveis publicamente e sem
+  necessidade de confiança (o registro em si continua curado pelo owner)
 - Torna auditorias verificáveis
 - Cria histórico público de protocolos
 - Estabelece camada de auditoria on-chain
