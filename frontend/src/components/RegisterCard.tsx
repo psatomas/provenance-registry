@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { hashPdf } from "../lib/hashPdf";
+import artifact from "../abi/ProtocolProvenanceRegistry.json";
 
 import {
     FileCode2,
@@ -15,6 +16,49 @@ import {
     AlertCircle,
     FileText
 } from "lucide-react";
+
+// Built from the same ABI the contract client uses, so custom-error decoding
+// stays correct even if the call fails before a contract instance exists.
+const REGISTRY_INTERFACE = new ethers.Interface(artifact.abi);
+
+// =========================================================
+// CUSTOM ERROR DECODING
+// =========================================================
+//
+// ethers can surface a contract revert as an opaque
+// "execution reverted (unknown custom error)" message (err.reason is null)
+// depending on how the provider (MetaMask, JSON-RPC) shapes the error. Walk
+// the known locations for raw revert data and decode it against the
+// registry's own ABI instead of relying on err.reason/shortMessage alone.
+type EthersLikeError = {
+    data?: unknown;
+    info?: { error?: { data?: unknown } };
+    error?: { data?: unknown; error?: { data?: unknown } };
+};
+
+function decodeRegistryErrorName(err: unknown): string | undefined {
+    const shaped = err as EthersLikeError;
+
+    const candidates = [
+        shaped?.data,
+        shaped?.info?.error?.data,
+        shaped?.error?.data,
+        shaped?.error?.error?.data,
+    ];
+
+    for (const data of candidates) {
+        if (typeof data === "string" && data.startsWith("0x")) {
+            try {
+                const parsed = REGISTRY_INTERFACE.parseError(data);
+                if (parsed) return parsed.name;
+            } catch {
+                // not decodable from this candidate, try the next one
+            }
+        }
+    }
+
+    return undefined;
+}
 
 export default function RegisterCard() {
 
@@ -103,12 +147,20 @@ export default function RegisterCard() {
 
             console.error(err);
 
-            setError(
-                err?.reason ||
-                err?.shortMessage ||
-                err?.message ||
-                "Transaction failed"
-            );
+            const errorName = decodeRegistryErrorName(err);
+
+            if (errorName === "NotOwner") {
+                setError(
+                    "Only the registry owner can register provenance records. Connect the owner wallet and try again."
+                );
+            } else {
+                setError(
+                    err?.reason ||
+                    err?.shortMessage ||
+                    err?.message ||
+                    "Transaction failed"
+                );
+            }
 
         } finally {
             setLoading(false);
