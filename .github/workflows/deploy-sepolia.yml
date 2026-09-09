@@ -1,0 +1,147 @@
+name: Deploy Registry to Sepolia (Manual)
+
+# Manual-only deployment. This workflow never runs on push, pull_request,
+# merge, or tag creation - only an explicit, human-triggered dispatch with
+# a typed confirmation can deploy a new contract to Sepolia.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: >
+          Type exactly "DEPLOY-SEPOLIA" to confirm you want to deploy a NEW
+          ProtocolProvenanceRegistry contract to Sepolia. This does not
+          modify or replace any existing deployment - it only creates a new
+          one. Anything else aborts the run before any network call is made.
+        required: true
+
+# Refuse to run two deployments at once.
+concurrency:
+  group: deploy-sepolia
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Compile, test, and deploy to Sepolia
+    runs-on: ubuntu-latest
+
+    # Hard gate: the job does not start at all unless the confirmation
+    # phrase was typed exactly. No network call happens before this check.
+    if: github.event.inputs.confirm == 'DEPLOY-SEPOLIA'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (from lockfile)
+        run: npm ci
+
+      - name: Compile contracts
+        env:
+          # A syntactically valid placeholder only - hardhat.config.ts
+          # validates networks.sepolia.url eagerly even for tasks (like
+          # compile) that never touch the network. The real secret is not
+          # needed, and is not used, here.
+          SEPOLIA_RPC_URL: "http://127.0.0.1:8545"
+        run: npx hardhat compile
+
+      - name: Run Solidity test suite
+        env:
+          # Same placeholder as above - config validation only.
+          SEPOLIA_RPC_URL: "http://127.0.0.1:8545"
+        run: |
+          set -e
+
+          # test/ProtocolProvenanceRegistry.ts connects to a local JSON-RPC
+          # node directly, so one must already be listening on :8545.
+          npx hardhat node > /tmp/hardhat-node.log 2>&1 &
+          NODE_PID=$!
+
+          echo "Waiting for local Hardhat node to accept connections..."
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null -w '%{http_code}' \
+                 -X POST -H "Content-Type: application/json" \
+                 --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
+                 http://127.0.0.1:8545 | grep -q 200; then
+              echo "Node is up."
+              break
+            fi
+            sleep 1
+          done
+
+          npx hardhat test
+          TEST_EXIT_CODE=$?
+
+          kill "$NODE_PID" 2>/dev/null || true
+
+          exit $TEST_EXIT_CODE
+
+      - name: Deploy via Hardhat Ignition
+        id: deploy
+        env:
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          SEPOLIA_PRIVATE_KEY: ${{ secrets.SEPOLIA_PRIVATE_KEY }}
+        run: |
+          set -e
+          npx hardhat ignition deploy ignition/modules/ProtocolRegistry.ts --network sepolia
+
+      - name: Extract deployed address
+        id: address
+        run: |
+          set -e
+          FILE="ignition/deployments/chain-11155111/deployed_addresses.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo "::error::Deployment record not found at $FILE"
+            exit 1
+          fi
+
+          ADDRESS=$(node -e "console.log(require('./$FILE')['ProtocolRegistryModule#ProtocolProvenanceRegistry'])")
+
+          if [ -z "$ADDRESS" ] || [ "$ADDRESS" = "undefined" ]; then
+            echo "::error::Could not read the deployed address from $FILE"
+            exit 1
+          fi
+
+          echo "Deployed address: $ADDRESS"
+          echo "address=$ADDRESS" >> "$GITHUB_OUTPUT"
+
+      - name: Verify deployment (read-only checks)
+        env:
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+        run: npx hardhat run scripts/verify-deployment.ts --network sepolia
+
+      - name: Verify on Etherscan (optional, non-blocking)
+        # Only attempted if an Etherscan API key secret has actually been
+        # configured for this repository. Never required for the
+        # deployment itself to be considered successful.
+        if: ${{ secrets.ETHERSCAN_API_KEY != '' }}
+        continue-on-error: true
+        env:
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: npx hardhat verify --network sepolia "${{ steps.address.outputs.address }}"
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Sepolia Deployment"
+            echo ""
+            echo "- **Network:** Sepolia (chain id 11155111)"
+            echo "- **New contract address:** \`${{ steps.address.outputs.address }}\`"
+            echo "- **Etherscan:** https://sepolia.etherscan.io/address/${{ steps.address.outputs.address }}"
+            echo ""
+            echo "This workflow only deployed a new contract. It did NOT update"
+            echo "frontend/src/lib/contract.ts, README.md, or scripts/make-test-pdf.ts -"
+            echo "those canonical references must be updated in a separate, reviewed commit."
+          } >> "$GITHUB_STEP_SUMMARY"
