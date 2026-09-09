@@ -7,11 +7,13 @@ dotenv.config();
 // Explicit plugin imports
 import HardhatIgnitionEthersPlugin from "@nomicfoundation/hardhat-ignition-ethers";
 import HardhatVerifyPlugin from "@nomicfoundation/hardhat-verify";
+import HardhatMochaPlugin from "@nomicfoundation/hardhat-mocha";
 
 export default defineConfig({
   plugins: [
     HardhatIgnitionEthersPlugin,
     HardhatVerifyPlugin,
+    HardhatMochaPlugin,
   ],
   paths: {
     sources: "./contracts",
