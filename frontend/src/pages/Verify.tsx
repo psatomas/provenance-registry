@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { ethers } from "ethers";
 import Navbar from "../components/Navbar";
 import VerifyCard from "../components/VerifyCard";
 
-import { getLatestRecord } from "../lib/contract";
+import { getProtocolHistory } from "../lib/contract";
 import { hashPdf } from "../lib/hashPdf";
 
 export default function Verify() {
@@ -45,6 +46,11 @@ function VerifyCardWithVerification() {
         return;
       }
 
+      if (!ethers.isAddress(contractAddress.trim())) {
+        setError("Invalid contract address.");
+        return;
+      }
+
       if (!file) {
         setError("Please upload an audit PDF.");
         return;
@@ -53,13 +59,30 @@ function VerifyCardWithVerification() {
       setLoading(true);
 
       const uploadedHash = await hashPdf(file);
-      const record = await getLatestRecord(contractAddress);
+      const history = await getProtocolHistory(contractAddress.trim());
 
-      const valid =
-        uploadedHash.toLowerCase() === record.auditHash.toLowerCase();
+      // "No records" (nothing registered for this address) is a distinct
+      // outcome from "hash does not match the latest record" — surface it
+      // as a validation-style error rather than a false/invalid result.
+      if (!history || history.length === 0) {
+        setError(
+          "No provenance records found for this contract address."
+        );
+        return;
+      }
+
+      const matchIndex = history.findIndex(
+        (record: any) =>
+          record.auditHash.toLowerCase() === uploadedHash.toLowerCase()
+      );
+
+      const matched = matchIndex !== -1 ? history[matchIndex] : null;
+      const latest = history[history.length - 1];
+      const record = matched ?? latest;
 
       const finalResult = {
-        valid,
+        valid: matched !== null,
+        isLatest: matched !== null && matchIndex === history.length - 1,
         ...record,
         timestamp: new Date(
           Number(record.timestamp) * 1000
@@ -69,7 +92,7 @@ function VerifyCardWithVerification() {
       setResult(finalResult);
     } catch (err) {
       console.error(err);
-      setError("Unable to verify protocol. Record may not exist.");
+      setError("Unable to verify protocol. Please check the contract address and try again.");
     } finally {
       setLoading(false);
     }

@@ -160,8 +160,10 @@ export default function VerifyCard({
 
                                     <p className="text-sm text-slate-300 mt-1">
                                         {result.valid
-                                            ? "The uploaded PDF matches the audit hash stored on-chain."
-                                            : "The uploaded PDF does not match the registered provenance record."}
+                                            ? result.isLatest
+                                                ? "The uploaded PDF matches the latest audit hash stored on-chain."
+                                                : `The uploaded PDF matches a historical audit record (version ${result.version}), not the latest version.`
+                                            : "The uploaded PDF does not match any registered provenance record for this address."}
                                     </p>
                                 </div>
                             </div>
