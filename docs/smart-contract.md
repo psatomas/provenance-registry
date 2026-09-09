@@ -41,8 +41,8 @@ Each protocol entry is stored as a structured record:
 ```solidity
 struct ProtocolRecord {
     string protocolName;
-    uint256 version;
     address contractAddress;
+    string version;
     bytes32 auditHash;
     bytes32 commitHash;
     string auditor;
@@ -69,13 +69,28 @@ mapping(address => ProtocolRecord[]) private records;
 
 ## 🔐 Access Control
 
-### Owner Restriction
+### Authorization Model
+
+ProtocolProvenanceRegistry is an **owner-curated registry**, not a self-attestation
+system: a single authorized owner account registers provenance records on behalf of
+protocols, identified by their `contractAddress`. The protocol represented by
+`contractAddress` is not required to sign or originate the transaction itself — the
+owner is the sole trust anchor for what gets written. This is a deliberate MVP trust
+model (see `docs/security.md`), not an oversight.
 
 Only the contract owner can register new protocol records:
 
 ```solidity
-modifier onlyOwner()
+modifier onlyOwner() {
+    if (msg.sender != owner) {
+        revert NotOwner();
+    }
+    _;
+}
 ```
+
+`registerProtocolRecord` is restricted with `onlyOwner`. `transferOwnership` (also
+`onlyOwner`) lets the current owner hand control to a new address.
 
 ### Purpose:
 - Prevent unauthorized protocol registration
@@ -87,25 +102,27 @@ modifier onlyOwner()
 
 ---
 
-### 1. `registerProtocol(...)`
+### 1. `registerProtocolRecord(...)`
 
 Registers a new protocol provenance record.
 
 #### Parameters:
-- `protocolName`
-- `contractAddress`
-- `version`
-- `auditHash`
-- `commitHash`
-- `auditor`
+- `protocolName` (`string`)
+- `contractAddress` (`address`)
+- `version` (`string`)
+- `auditHash` (`bytes32`)
+- `commitHash` (`bytes32`)
+- `auditor` (`string`)
 
 #### Behavior:
-- Creates a new `ProtocolRecord`
-- Appends it to history
-- Emits event for off-chain indexing
+- Validates every field is non-empty / non-zero (reverts with `InvalidProtocolName`,
+  `InvalidContractAddress`, `InvalidVersion`, `InvalidAuditHash`, `InvalidCommitHash`,
+  or `InvalidAuditor` otherwise)
+- Creates a new `ProtocolRecord` and appends it to `records[contractAddress]`
+- Emits `ProtocolRegistered` for off-chain indexing
 
 #### Security:
-- Restricted via `onlyOwner`
+- Restricted via `onlyOwner` (reverts with `NotOwner` otherwise)
 
 ---
 
@@ -114,17 +131,20 @@ Registers a new protocol provenance record.
 Returns full provenance history for a protocol.
 
 #### Output:
-- Array of `ProtocolRecord`
+- Array of `ProtocolRecord` (empty array if none exist)
 
 #### Purpose:
 - Enables full audit trail reconstruction
-- Used by Explorer UI
+- Used by Explorer UI and by Verify UI to check historical (non-latest) records
 
 ---
 
 ### 3. `getLatestRecord(address)`
 
 Returns the most recent protocol version.
+
+#### Behavior:
+- Reverts with `NoRecordsFound` if no record exists for `contractAddress`
 
 #### Purpose:
 - Quick access to current state
@@ -142,6 +162,17 @@ Returns number of stored versions.
 
 ---
 
+### 5. `transferOwnership(address newOwner)`
+
+Transfers registry ownership to a new address.
+
+#### Behavior:
+- Restricted via `onlyOwner` (reverts with `NotOwner` otherwise)
+- Reverts with `"Invalid owner"` if `newOwner` is the zero address
+- Emits `OwnershipTransferred`
+
+---
+
 ## 📡 Events
 
 ### `ProtocolRegistered`
@@ -151,10 +182,24 @@ Emitted when a new protocol record is created:
 ```solidity
 event ProtocolRegistered(
     address indexed contractAddress,
+    bytes32 indexed auditHash,
+    bytes32 indexed commitHash,
     string protocolName,
-    uint256 version,
-    bytes32 auditHash,
+    string version,
+    string auditor,
     uint256 timestamp
+);
+```
+
+### `OwnershipTransferred`
+
+Emitted on deployment (`previousOwner` = zero address) and whenever
+`transferOwnership` succeeds:
+
+```solidity
+event OwnershipTransferred(
+    address indexed previousOwner,
+    address indexed newOwner
 );
 ```
 
@@ -162,6 +207,25 @@ event ProtocolRegistered(
 - Enables off-chain indexing
 - Supports explorer functionality
 - Improves transparency
+
+---
+
+## ⚠️ Errors
+
+All validation and access-control failures use custom errors (gas-efficient, no
+string reverts) except `transferOwnership`'s zero-address check, which keeps a plain
+`require` string:
+
+| Error | Raised when |
+|---|---|
+| `NotOwner()` | Caller of `registerProtocolRecord` or `transferOwnership` is not `owner` |
+| `InvalidProtocolName()` | `protocolName` is empty |
+| `InvalidContractAddress()` | `contractAddress` is the zero address |
+| `InvalidVersion()` | `version` is empty |
+| `InvalidAuditHash()` | `auditHash` is `bytes32(0)` |
+| `InvalidCommitHash()` | `commitHash` is `bytes32(0)` |
+| `InvalidAuditor()` | `auditor` is empty |
+| `NoRecordsFound()` | `getLatestRecord` is called for an address with no records |
 
 ---
 
@@ -222,8 +286,12 @@ No deletion, no modification, no rollback.
 
 ## ⚠️ Limitations
 
-- No pagination for large histories (future improvement)
-- Owner centralized write control (intentional for MVP trust model)
+- No pagination for `getProtocolHistory` / `records[addr]` (future improvement).
+  Growth is bounded by the owner's willingness to register records — since writes
+  are `onlyOwner`, this is a cost/UX concern (a very long history becomes gas-heavy
+  to read in one call) rather than a public spam/DoS vector.
+- Owner centralized write control (intentional for MVP trust model — see
+  Authorization Model above)
 - No upgradeability pattern (immutable deployment)
 
 ---

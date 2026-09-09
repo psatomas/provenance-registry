@@ -28,6 +28,14 @@ An attacker attempts to register invalid or fake protocol data.
 - Smart contract uses `onlyOwner` modifier
 - Only authorized wallet can write state
 
+### Authorization model:
+ProofChain is an **owner-curated registry**, not a self-attestation system. A single
+authorized owner account registers provenance records on behalf of protocols; the
+`contractAddress` a record refers to is not required to sign or originate the
+transaction itself. Anyone can *read* history for any address, but only the owner
+can *write*. This is an intentional MVP trust model — a curated registry — not a
+placeholder for a future signature or role-based scheme.
+
 ---
 
 ### 2. Data Tampering
@@ -173,6 +181,13 @@ If frontend is compromised, hash generation could be manipulated (mitigated by u
 
 ### 3. RPC Trust Boundary
 RPC providers are assumed to be honest but not authoritative.
+
+### 4. Unbounded Per-Address History
+`getProtocolHistory` / `records[addr]` has no pagination. Because writes are
+`onlyOwner`, this is not a public spam/DoS vector — only the owner can grow an
+address's history — but a very long history is still gas-heavy to read back in one
+call. Accepted as a known limitation for the current scale; would need pagination
+before supporting protocols with very large version histories.
 
 ---
 
