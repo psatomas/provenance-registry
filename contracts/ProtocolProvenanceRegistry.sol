@@ -14,6 +14,7 @@ contract ProtocolProvenanceRegistry {
     error InvalidAuditHash();
     error InvalidCommitHash();
     error InvalidAuditor();
+    error NoRecordsFound();
 
     // =============================================================
     //                           STRUCTS
@@ -86,7 +87,7 @@ contract ProtocolProvenanceRegistry {
         bytes32 auditHash,
         bytes32 commitHash,
         string memory auditor
-    ) external {
+    ) external onlyOwner {
 
         // Validation
         if (bytes(protocolName).length == 0) revert InvalidProtocolName();
@@ -129,7 +130,7 @@ contract ProtocolProvenanceRegistry {
     }
 
     function getLatestRecord(address contractAddress) external view returns (ProtocolRecord memory) {
-        require(records[contractAddress].length > 0, "No records found");
+        if (records[contractAddress].length == 0) revert NoRecordsFound();
         return records[contractAddress][records[contractAddress].length - 1];
     }
 

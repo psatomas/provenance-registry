@@ -115,7 +115,7 @@ describe("ProtocolProvenanceRegistry", function () {
 
     it("should reject non-owner registration", async function () {
 
-        const { attackerContract } = await deployFixture();
+        const { contract, attackerContract } = await deployFixture();
 
         const auditHash = ethers.keccak256(
             ethers.toUtf8Bytes("audit-pdf")
@@ -125,12 +125,15 @@ describe("ProtocolProvenanceRegistry", function () {
             ethers.toUtf8Bytes("commit-sha")
         );
 
+        const target = "0x9999999999999999999999999999999999999999";
+
         let reverted = false;
+        let errorName: string | undefined;
 
         try {
             await attackerContract.registerProtocolRecord(
                 "Hack",
-                "0x9999999999999999999999999999999999999999",
+                target,
                 "v999",
                 auditHash,
                 commitHash,
@@ -138,9 +141,60 @@ describe("ProtocolProvenanceRegistry", function () {
             );
         } catch (err: any) {
             reverted = true;
+
+            const errorData = err?.data ?? err?.info?.error?.data;
+
+            if (errorData) {
+                try {
+                    errorName = contract.interface.parseError(errorData)?.name;
+                } catch {
+                    // leave errorName undefined if it can't be decoded
+                }
+            }
         }
 
         expect(reverted).to.equal(true);
+        if (errorName) {
+            expect(errorName).to.equal("NotOwner");
+        }
+
+        // State must remain unchanged: the attacker's write must not persist.
+        expect(await contract.getRecordCount(target)).to.equal(0n);
+    });
+
+    // =========================================================
+    // READ EDGE CASES
+    // =========================================================
+
+    it("should revert getLatestRecord with NoRecordsFound when no records exist", async function () {
+
+        const { contract } = await deployFixture();
+
+        let reverted = false;
+        let errorName: string | undefined;
+
+        try {
+            await contract.getLatestRecord(
+                "0x1111111111111111111111111111111111111111"
+            );
+        } catch (err: any) {
+            reverted = true;
+
+            const errorData = err?.data ?? err?.info?.error?.data;
+
+            if (errorData) {
+                try {
+                    errorName = contract.interface.parseError(errorData)?.name;
+                } catch {
+                    // leave errorName undefined if it can't be decoded
+                }
+            }
+        }
+
+        expect(reverted).to.equal(true);
+        if (errorName) {
+            expect(errorName).to.equal("NoRecordsFound");
+        }
     });
 
 });
