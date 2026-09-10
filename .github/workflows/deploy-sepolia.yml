@@ -90,6 +90,13 @@ jobs:
         env:
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
           SEPOLIA_PRIVATE_KEY: ${{ secrets.SEPOLIA_PRIVATE_KEY }}
+          # Hardhat Ignition prompts interactively for any non-local chain
+          # unless this exact env var is set (see
+          # @nomicfoundation/hardhat-ignition's deploy task source). This is
+          # a separate, lower-level Hardhat prompt from - and does not
+          # replace or weaken - the DEPLOY-SEPOLIA confirmation gate above,
+          # which is the actual human authorization for this workflow run.
+          HARDHAT_IGNITION_CONFIRM_DEPLOYMENT: "true"
         run: |
           set -e
           npx hardhat ignition deploy ignition/modules/ProtocolRegistry.ts --network sepolia
