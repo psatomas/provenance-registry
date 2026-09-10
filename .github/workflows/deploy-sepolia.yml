@@ -120,11 +120,27 @@ jobs:
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
         run: npx hardhat run scripts/verify-deployment.ts --network sepolia
 
+      - name: Check for Etherscan API key
+        # The `secrets` context cannot be referenced directly in an `if:`
+        # condition (it's not in scope for expression evaluation there -
+        # GitHub Actions rejects the workflow at parse time if you try).
+        # Resolve presence into a step output instead, which `if:` can read.
+        # Only a non-secret "true"/"false" string leaves this step.
+        id: etherscan_key_check
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: |
+          if [ -n "$ETHERSCAN_API_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Verify on Etherscan (optional, non-blocking)
         # Only attempted if an Etherscan API key secret has actually been
         # configured for this repository. Never required for the
         # deployment itself to be considered successful.
-        if: ${{ secrets.ETHERSCAN_API_KEY != '' }}
+        if: ${{ steps.etherscan_key_check.outputs.present == 'true' }}
         continue-on-error: true
         env:
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
