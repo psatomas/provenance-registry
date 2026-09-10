@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import artifact from "../abi/ProtocolProvenanceRegistry.json";
 
-const CONTRACT_ADDRESS = "0x8166431404B7f8e5e9d351333e08548a23Bbdae0";
+const CONTRACT_ADDRESS = "0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA";
 
 // Extract ABI safely
 const abi = artifact.abi;

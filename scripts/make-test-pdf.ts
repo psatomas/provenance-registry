@@ -2,7 +2,7 @@ import fs from "fs";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { keccak256 } from "ethers";
 
-const CONTRACT_ADDRESS = "0x8166431404B7f8e5e9d351333e08548a23Bbdae0";
+const CONTRACT_ADDRESS = "0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA";
 
 async function createPDF() {
     const pdfDoc = await PDFDocument.create();
