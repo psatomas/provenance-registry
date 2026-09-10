@@ -143,16 +143,41 @@ jobs:
             echo "present=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Verify on Etherscan (optional, non-blocking)
+      - name: Verify contract on explorers
         # Only attempted if an Etherscan API key secret has actually been
-        # configured for this repository. Never required for the
-        # deployment itself to be considered successful.
+        # configured for this repository.
         if: ${{ steps.etherscan_key_check.outputs.present == 'true' }}
-        continue-on-error: true
+        # The combined `hardhat verify` task runs every enabled provider
+        # (etherscan, blockscout, sourcify - all enabled by default per
+        # @nomicfoundation/hardhat-verify) and reports a single failure if
+        # ANY of them errors, even if the others succeeded. Blockscout is a
+        # secondary, external explorer that has been observed rate-limiting
+        # (HTTP 429) independently of whether Etherscan verification (the
+        # one that actually matters here) succeeded. Run each provider as
+        # its own subtask instead, so each one's outcome can be handled on
+        # its own terms:
+        #   - Etherscan: required - its failure fails this step (and the job).
+        #   - Sourcify: unchanged from prior behavior - informational only.
+        #   - Blockscout: informational only - an external rate limit or
+        #     outage on a secondary explorer must not fail an otherwise
+        #     successful deployment that Etherscan already verified.
         env:
           SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-        run: npx hardhat verify --network sepolia "${{ steps.address.outputs.address }}"
+        run: |
+          set -e
+          ADDRESS="${{ steps.address.outputs.address }}"
+
+          echo "=== Etherscan verification (required) ==="
+          npx hardhat verify etherscan --network sepolia "$ADDRESS"
+
+          echo "=== Sourcify verification (informational, non-blocking) ==="
+          npx hardhat verify sourcify --network sepolia "$ADDRESS" \
+            || echo "::warning::Sourcify verification did not succeed. Non-blocking - deployment remains valid."
+
+          echo "=== Blockscout verification (informational, non-blocking) ==="
+          npx hardhat verify blockscout --network sepolia "$ADDRESS" \
+            || echo "::warning::Blockscout verification did not succeed (e.g. external rate limit). Non-blocking - deployment remains valid."
 
       - name: Publish summary
         if: always()
