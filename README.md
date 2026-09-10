@@ -19,9 +19,9 @@
           <div>
             <code style="background: #0f172a; color: #38bdf8; padding: 6px 12px; border-radius: 6px; border: 1px solid #1e293b; font-size: 13px;">
                 Sepolia Contract:
-                <a href="https://sepolia.etherscan.io/address/0x8166431404B7f8e5e9d351333e08548a23Bbdae0"
+                <a href="https://sepolia.etherscan.io/address/0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA"
                 style="color: #38bdf8; text-decoration: none;">
-                0x8166...bdae0 ↗
+                0xd8FC...021BA ↗
                 </a>
             </code>
         </div>
@@ -143,15 +143,26 @@ Read functions:
 
 ## 🌍 Live Deployment
 
-- Network: Ethereum Sepolia
-- Contract Address:
+- Network: **Ethereum Sepolia** (testnet — not Ethereum Mainnet)
+- Contract Address (current, remediated deployment):
 
 ```
-0x8166431404B7f8e5e9d351333e08548a23Bbdae0
+0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA
 ```
 
-- Fully verifiable on Etherscan / Blockscout
+- [View on Etherscan](https://sepolia.etherscan.io/address/0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA)
+- Verification status:
+  - ✅ Etherscan — verified
+  - ✅ Sourcify — verified
+  - ⏳ Blockscout — best-effort (may be rate-limited; not required for deployment validity)
 - Real gas-based execution enabled
+
+### ⚠️ Superseded deployment
+
+An earlier deployment at `0x8166431404B7f8e5e9d351333e08548a23Bbdae0` predates the
+`onlyOwner` authorization fix on `registerProtocolRecord` and does **not** enforce
+owner-only writes. It is kept here only for historical/audit-trail reference — it
+is not the current contract, should not be used, and should not be treated as secure.
 
 ---
 
@@ -243,8 +254,9 @@ Smart Contract: Complete
 Frontend: Complete  
 Web3 Integration: Complete  
 Testing: Complete  
-Sepolia Deployment: Complete  
-Verify System: Complete
+Sepolia Deployment: Complete (current contract — see Live Deployment section)  
+Verify System: Complete  
+End-to-End Flow (Register → Verify → Explorer): Validated on Sepolia
 
 ---
 
@@ -385,15 +397,27 @@ Funções de leitura:
 
 ## 🌍 Deploy
 
-- Rede: Ethereum Sepolia
-- Contrato:
+- Rede: **Ethereum Sepolia** (testnet — não é a Mainnet da Ethereum)
+- Contrato (deploy atual, remediado):
 
 ```
-0x8166431404B7f8e5e9d351333e08548a23Bbdae0
+0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA
 ```
 
-- Verificável em exploradores públicos
+- [Ver no Etherscan](https://sepolia.etherscan.io/address/0xd8FC6C229d7666865EDE56f56C68Af01cC5021BA)
+- Status de verificação:
+  - ✅ Etherscan — verificado
+  - ✅ Sourcify — verificado
+  - ⏳ Blockscout — melhor esforço (pode sofrer limitação de taxa; não é necessário para a validade do deploy)
 - Execução real com gas
+
+### ⚠️ Deploy substituído
+
+Um deploy anterior em `0x8166431404B7f8e5e9d351333e08548a23Bbdae0` é anterior à
+correção de autorização `onlyOwner` em `registerProtocolRecord` e não restringe a
+escrita apenas ao owner. Está listado aqui apenas para referência histórica e
+trilha de auditoria — não é o contrato atual, não deve ser usado, e não deve ser
+considerado seguro.
 
 ---
 
@@ -477,7 +501,8 @@ Papéis:
 
 ## 🏁 Status
 
-Completo em todas as camadas
+Completo em todas as camadas (deploy atual em Sepolia — ver seção "Deploy")  
+Fluxo ponta a ponta (Registrar → Verificar → Explorer): validado em Sepolia
 
 ---
 
